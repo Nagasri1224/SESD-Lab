@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pingili Nagasri — Interactive Resume</title>
+<meta name="description" content="Resume of Pingili Nagasri — 3rd year B.Tech CSE (AIML), SR University. SIH Hackathon, Research Paper, Nature Heals project. Skilled in Python and Java." />
+<style>
+  /* =========================================================
+     PREMIUM PALETTE (HSL) — midnight → indigo → cyan → coral
+     ========================================================= */
+  :root{
+    --bg-0: hsl(230 35% 7%);        /* Midnight Navy */
+    --bg-1: hsl(232 40% 10% / .75); /* Deep overlay */
+    --card: hsl(232 32% 14% / .65); /* Glass surface */
+    --stroke: hsl(230 35% 35% / .35);
+    --text: hsl(220 30% 95%);
+    --muted: hsl(220 15% 70%);
+    --brand: hsl(260 90% 66%);      /* Electric Indigo */
+    --brand-2: hsl(190 90% 60%);    /* Neon Cyan */
+    --accent: hsl(13 90% 64%);      /* Soft Coral */
+    --sun: hsl(48 100% 65%);
+    --glow: 0 8px 40px hsl(260 90% 66% / .25);
+    --glass: saturate(160%) blur(14px);
+    --radius: 18px;
+    --shadow-1: 0 1px 0 hsl(0 0% 0% / .2), 0 12px 30px hsl(0 0% 0% / .35);
+    --ring: 0 0 0 2px hsl(260 90% 66% / .35);
+
+    /* Typography scale */
+    --step--1: clamp(.86rem, .84rem + .2vw, .95rem);
+    --step-0: clamp(1rem, .95rem + .4vw, 1.1rem);
+    --step-1: clamp(1.15rem, 1.05rem + .6vw, 1.35rem);
+    --step-2: clamp(1.4rem, 1.2rem + 1vw, 1.7rem);
+    --step-3: clamp(1.9rem, 1.5rem + 2vw, 2.6rem);
+    --step-4: clamp(2.6rem, 2rem + 3vw, 3.6rem);
+  }
+
+  /* Light theme swap */
+  [data-theme="light"]{
+    --bg-0: hsl(220 100% 99%);
+    --bg-1: hsl(220 65% 97% / .85);
+    --card: hsl(220 40% 99% / .75);
+    --stroke: hsl(220 20% 70% / .35);
+    --text: hsl(230 35% 12%);
+    --muted: hsl(230 15% 35%);
+    --brand: hsl(256 75% 55%);
+    --brand-2: hsl(192 85% 45%);
+    --accent: hsl(13 85% 52%);
+    --sun: hsl(42 90% 55%);
+    --glow: 0 6px 28px hsl(260 90% 66% / .22);
+    --glass: saturate(140%) blur(12px);
+    --shadow-1: 0 10px 30px hsl(230 35% 40% / .15);
+  }
+
+  /* ================== Base ================== */
+  * { box-sizing: border-box }
+  html { scroll-behavior: smooth }
+  body{
+    margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, "Helvetica Neue", Arial;
+    color:var(--text); background:var(--bg-0); overflow-x:hidden;
+  }
+  a{ color: inherit; text-decoration: none }
+  a:focus-visible, button:focus-visible{ outline: none; box-shadow: var(--ring); border-radius: 10px }
+
+  /* ============ Animated Conic Gradient Sky + Particles ============ */
+  .scene{
+    position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(1200px 800px at 80% -10%, hsl(260 90% 60% / .25), transparent 60%),
+      radial-gradient(1000px 600px at 10% 110%, hsl(190 90% 55% / .25), transparent 70%),
+      conic-gradient(from 210deg at 50% 50%, hsl(230 35% 8%), hsl(245 45% 12%), hsl(230 35% 8%));
+    animation: sky 24s linear infinite;
+  }
+  @keyframes sky { to { transform: rotate(360deg) } }
+
+  canvas#parallax{
+    position: fixed; inset: 0; z-index: -1; filter: drop-shadow(0 0 2px hsl(190 90% 70% / .35));
+    opacity:.5; pointer-events: none;
+  }
+
+  /* ================== Layout ================== */
+  .wrap{
+    max-width: 1200px; margin:auto; padding: clamp(16px, 2vw, 32px);
+    display:grid; grid-template-columns: 320px 1fr; gap: 28px;
+  }
+  @media (max-width: 980px){ .wrap{ grid-template-columns: 1fr } }
+
+  /* ================== Sidebar ================== */
+  .sidebar{
+    position: sticky; top: 16px; align-self: start;
+    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius);
+    backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+    box-shadow: var(--shadow-1);
+    padding: 20px; transform-style: preserve-3d;
+  }
+  .avatar{
+    width: 104px; height: 104px; border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 30%, #fff2, transparent 50%),
+      linear-gradient(135deg, var(--brand), var(--brand-2));
+    display:grid; place-items:center; color:#fff; font-weight: 900; font-size: 34px;
+    box-shadow: inset 0 0 24px #00000033, var(--glow);
+    transform: translateZ(20px) rotateX(6deg);
+  }
+  .name{ font: 800 var(--step-2)/1.05 ui-sans-serif, system-ui; margin-top: 12px; letter-spacing:.2px }
+  .role{ color: var(--muted); margin: 6px 0 14px; font-size: var(--step--1) }
+
+  .contact a{
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 12px; border-radius: 12px; border:1px dashed transparent;
+  }
+  .contact a:hover{ border-color: var(--stroke); background: hsl(0 0% 100% / .04) }
+
+  .nav{ display:flex; flex-wrap:wrap; gap:10px; margin-top: 14px }
+  .chip{
+    padding: 8px 12px; border-radius: 999px; border:1px solid var(--stroke); background: hsl(0 0% 100% / .06);
+    font-size: .95rem; transition: transform .2s ease;
+  }
+  .chip:hover{ transform: translateY(-2px); box-shadow: var(--glow) }
+
+  .actions{ display:flex; gap:10px; margin-top: 14px; flex-wrap: wrap }
+  .btn{
+    cursor:pointer; border:1px solid var(--stroke); background: hsl(0 0% 100% / .06);
+    padding:10px 12px; border-radius:12px; box-shadow: var(--shadow-1);
+    transition: transform .15s ease, box-shadow .2s ease;
+  }
+  .btn:hover{ transform: translateY(-2px); box-shadow: var(--glow) }
+
+  /* ================== Cards / Sections ================== */
+  .card{
+    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius);
+    backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+    box-shadow: var(--shadow-1); padding: 24px; transform-style: preserve-3d;
+  }
+  h2{
+    margin:0 0 12px; font-size: var(--step-1); letter-spacing:.3px; display:flex; align-items:center; gap:8px;
+  }
+  h2 .badge{
+    font-size:.7rem; padding:4px 10px; border-radius: 999px; border:1px solid var(--stroke); color:var(--muted);
+  }
+  p, li{ font-size: var(--step-0) }
+  .sub{ color: var(--muted) }
+
+  /* ================== Education ================== */
+  .edu-list{ list-style:none; padding:0; margin:0 }
+  .edu-item{
+    padding:16px; border:1px dashed var(--stroke); border-radius: 14px; margin-bottom: 12px;
+    background: linear-gradient(180deg, hsl(0 0% 100% / .03), transparent);
+  }
+  .edu-pills{ margin-top:8px; display:flex; flex-wrap:wrap; gap:8px }
+  .pill{
+    font-size:.85rem; padding:6px 10px; border-radius:999px; border:1px solid var(--stroke);
+    background: linear-gradient(135deg, hsl(260 90% 66% / .15), hsl(190 90% 55% / .12));
+  }
+
+  /* ================== Skills ================== */
+  .skills{ display:flex; flex-wrap:wrap; gap:10px }
+  .skill{
+    padding:8px 12px; border-radius:999px; border:1px solid var(--stroke);
+    background: hsl(0 0% 100% / .06);
+    box-shadow: inset 0 0 16px hsl(0 0% 100% / .04);
+  }
+
+  /* ================== Timeline (Creative) ================== */
+  .timeline{ position:relative; margin: 10px 0 0; }
+  .timeline::before{
+    content:""; position:absolute; left:calc(50% - 1px); top:0; bottom:0; width:2px;
+    background: linear-gradient(var(--brand), var(--brand-2), transparent);
+    filter: drop-shadow(0 0 2px hsl(190 90% 70% / .45));
+  }
+  .item{
+    position:relative; width: min(560px, 92%); margin: 22px 0;
+    background: var(--card); border:1px solid var(--stroke); border-radius: 16px; padding: 16px 18px;
+    box-shadow: var(--shadow-1);
+    transform: translateZ(12px) rotateX(.8deg);
+  }
+  .item:nth-child(odd){ margin-left: auto }
+  .item:nth-child(even){ margin-right: auto }
+  .item::after{
+    content:""; position:absolute; top: 20px; width:18px; height:18px; border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #fff4, transparent 60%), var(--brand);
+    box-shadow: 0 0 0 6px hsl(260 90% 66% / .18), var(--glow);
+  }
+  .item:nth-child(odd)::after{ left: calc(-9px - 6px) }
+  .item:nth-child(even)::after{ right: calc(-9px - 6px) }
+
+  .when{ float:right; color: var(--muted); font-size: .95rem }
+  .where{ font-weight: 800; letter-spacing:.2px; font-size: var(--step-0) }
+  .bullets{ margin: 10px 0 0 18px }
+
+  /* ================== Projects ================== */
+  .proj-grid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px }
+  @media (max-width: 800px){ .proj-grid{ grid-template-columns: 1fr } }
+  .proj{
+    border:1px solid var(--stroke); border-radius: 16px; padding: 14px; background: var(--card);
+    display:grid; gap:6px;
+  }
+  .tag{
+    display:inline-block; font-size:.8rem; padding:4px 8px; border-radius:999px; border:1px solid var(--stroke);
+    color: var(--muted); background: hsl(0 0% 100% / .08);
+  }
+
+  /* ================== Reveal Animations ================== */
+  .reveal{ opacity:0; transform: translateY(12px) scale(.98); }
+  .reveal.in{ opacity:1; transform: none; transition: opacity .7s ease, transform .7s cubic-bezier(.21,1,.23,1) }
+
+  /* ================== Print ================== */
+  @media print{
+    .scene, #parallax, .actions{ display:none !important }
+    .wrap{ grid-template-columns: 1fr; padding:0 }
+    .card{ break-inside: avoid; box-shadow:none; background:#fff; color:#000; border-color:#ccc }
+    a{ color:#000 }
+  }
+
+  /* ================== Motion preference ================== */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important }
+    .reveal{ opacity:1; transform:none }
+  }
+
+  /* ================== 3D Hover (will be toggled by JS) ================== */
+  .tilt{ transform-style: preserve-3d; transition: transform .16s ease }
+  .tilt > .tilt-child{ transform: translateZ(22px) }
+</style>
+</head>
+<body>
+  <!-- Animated background + particles -->
+  <div class="scene" aria-hidden="true"></div>
+  <canvas id="parallax" aria-hidden="true"></canvas>
+
+  <div class="wrap">
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar tilt" aria-label="Sidebar with contact and navigation">
+      <div class="avatar tilt-child" aria-hidden="true">PN</div>
+      <div class="name">Pingili Nagasri</div>
+      <div class="role">B.Tech CSE (AIML) • 3rd Year</div>
+
+      <div class="contact" style="margin-top:10px">
+        <a href="mailto:nagasripingili@gmail.com" aria-label="Email">📧 nagasripingili@gmail.com</a>
+        <a href="tel:+91(9849634176)" aria-label="Phone">📞 +91 86865 08484</a>
+        <a href="https://www.linkedin.com/feed/" onclick="alert('Add your LinkedIn URL in the HTML!')" aria-label="LinkedIn">🔗 LinkedIn</a>
+        <a href="https://github.com/" onclick="alert('Add your GitHub URL in the HTML!')" aria-label="GitHub">💻 GitHub</a>
+      </div>
+
+      <nav class="nav" aria-label="Section navigation">
+        <a class="chip" href="#summary">Summary</a>
+        <a class="chip" href="#education">Education</a>
+        <a class="chip" href="#experience">Experience</a>
+        <a class="chip" href="#skills">Skills</a>
+        <a class="chip" href="#projects">Projects</a>
+      </nav>
+
+      <div class="actions">
+        <button class="btn" id="themeBtn" aria-label="Toggle theme">🌗 Theme</button>
+        <button class="btn" onclick="window.print()" aria-label="Print resume">🖨️ Print / Save PDF</button>
+      </div>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <main>
+      <!-- ===== SUMMARY ===== -->
+      <section id="summary" class="card reveal tilt" aria-labelledby="heading-summary">
+        <h2 id="heading-summary">
+          Profile Summary
+          <span class="badge">merged: feature/education + feature/experience → main</span>
+        </h2>
+        <p class="sub tilt-child">
+          I am an adaptable, fast-learning student focused on AI/ML and human-centered solutions.
+          I enjoy converting ideas into working prototypes, collaborating closely with teams, and refining
+          products through data-driven iteration. I’m eager to contribute to impactful projects while growing as a software engineer.
+        </p>
+      </section>
+
+      <!-- ===== EDUCATION (feature/education) ===== -->
+      <section id="education" class="card reveal tilt" aria-labelledby="heading-education">
+        <h2 id="heading-education">
+          Education <span class="badge">feature/education</span>
+        </h2>
+        <!-- HTML heading + list (as requested) -->
+        <ul class="edu-list">
+          <li class="edu-item tilt-child">
+            <h3 style="margin:0 0 6px; font-size: var(--step-0)">B.Tech in Computer Science & Engineering (AIML)</h3>
+            <p class="sub" style="margin:0 0 10px">SR University — 3rd Year</p>
+            <div class="edu-pills">
+              <span class="pill">CSE (AIML)</span>
+              <span class="pill">Dean’s list eligible</span>
+              <span class="pill">Passionate about ML</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ===== EXPERIENCE TIMELINE (feature/experience) ===== -->
+      <section id="experience" class="card reveal tilt" aria-labelledby="heading-experience">
+        <h2 id="heading-experience">
+          Experience & Achievements <span class="badge">feature/experience</span>
+        </h2>
+
+        <div class="timeline">
+          <!-- 1. SIH -->
+          <article class="item reveal">
+            <span class="when">2024</span>
+            <div class="where">Smart India Hackathon (SIH) — Team Member</div>
+            <p class="sub" style="margin:6px 0 0">National Innovation Hackathon</p>
+            <ul class="bullets">
+              <li>Prototyped an AI/ML solution for a real-world challenge; coordinated sprint planning and checkpoints.</li>
+              <li>Owned data preprocessing and model experimentation; delivered an end-to-end demo to mentors and judges.</li>
+            </ul>
+          </article>
+
+          <!-- 2. Research Paper -->
+          <article class="item reveal">
+            <span class="when">2024–2025</span>
+            <div class="where">Undergraduate Research — Co-Author</div>
+            <p class="sub" style="margin:6px 0 0">Applied AI/ML</p>
+            <ul class="bullets">
+              <li>Performed literature review and experiment design; reported findings with clear metrics and ablations.</li>
+              <li>Prepared reproducible code artifacts and documentation to support results and peer review.</li>
+            </ul>
+          </article>
+
+          <!-- 3. Nature Heals -->
+          <article class="item reveal">
+            <span class="when">2025</span>
+            <div class="where">“Nature Heals” — Project Lead</div>
+            <p class="sub" style="margin:6px 0 0">Wellness & Interaction Design</p>
+            <ul class="bullets">
+              <li>Built a calming, nature-inspired experience enhanced by simple ML modules for personalization.</li>
+              <li>Ran user feedback cycles and iterated on UI/UX accessibility, improving engagement and clarity.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===== SKILLS ===== -->
+      <section id="skills" class="card reveal tilt" aria-labelledby="heading-skills">
+        <h2 id="heading-skills">Skills</h2>
+        <div class="skills tilt-child">
+          <span class="skill">Python</span>
+          <span class="skill">Java</span>
+          <span class="skill">Machine Learning</span>
+          <span class="skill">Data Preprocessing</span>
+          <span class="skill">Model Evaluation</span>
+          <span class="skill">HTML • CSS • JS</span>
+          <span class="skill">Teamwork</span>
+          <span class="skill">Adaptability</span>
+          <span class="skill">Fast Learner</span>
+        </div>
+      </section>
+
+      <!-- ===== PROJECTS ===== -->
+      <section id="projects" class="card reveal tilt" aria-labelledby="heading-projects">
+        <h2 id="heading-projects">Selected Projects</h2>
+        <div class="proj-grid tilt-child">
+          <div class="proj">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <strong>Nature Heals</strong>
+              <span class="tag">AI/UX</span>
+            </div>
+            <p class="sub">
+              A wellness-focused experience that blends nature-inspired design with lightweight personalization.
+              Led concept, prototyping, and user feedback to refine clarity and calm.
+            </p>
+          </div>
+          <div class="proj">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <strong>Research Artifacts</strong>
+              <span class="tag">Reproducible</span>
+            </div>
+            <p class="sub">
+              Clean notebooks, evaluation scripts, and structured READMEs supporting experimental results and replication.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="sub" style="text-align:center; opacity:.9; margin-top:10px">
+        © 2025 Pingili Nagasri • Built as a static resume for GitHub Pages
+      </footer>
+    </main>
+  </div>
+
+<script>
+/* =========================================================
+   THEME TOGGLE (persisted)
+   ========================================================= */
+const root = document.documentElement;
+const savedTheme = localStorage.getItem('theme');
+if(savedTheme) root.setAttribute('data-theme', savedTheme);
+document.getElementById('themeBtn').addEventListener('click', ()=>{
+  const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+});
+
+/* =========================================================
+   PARALLAX PARTICLES (Canvas) — performant subtle depth
+   ========================================================= */
+const canvas = document.getElementById('parallax');
+const ctx = canvas.getContext('2d', { alpha: true });
+let W, H, dots = [];
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  dots = Array.from({length: Math.min(120, Math.floor(W*H/24000))}, () => ({
+    x: Math.random()*W,
+    y: Math.random()*H,
+    z: Math.random()*1 + .3,
+    vx: (Math.random()-.5)*.15,
+    vy: (Math.random()-.5)*.15
+  }));
+}
+resize(); addEventListener('resize', resize);
+
+function tick(){
+  ctx.clearRect(0,0,W,H);
+  for(const d of dots){
+    d.x += d.vx * d.z; d.y += d.vy * d.z;
+    if(d.x<0) d.x=W; if(d.x>W) d.x=0; if(d.y<0) d.y=H; if(d.y>H) d.y=0;
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, 1.2*d.z, 0, Math.PI*2);
+    ctx.fillStyle = `hsla(${190 + 70*d.z}, 90%, ${60 + 10*d.z}%, .65)`;
+    ctx.fill();
+  }
+  requestAnimationFrame(tick);
+}
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches){ tick(); }
+
+/* =========================================================
+   SCROLL REVEAL — IntersectionObserver
+   ========================================================= */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  for(const e of entries){
+    if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+  }
+},{ threshold: .12 });
+revealEls.forEach(el => io.observe(el));
+
+/* =========================================================
+   3D TILT — for .tilt groups
+   ========================================================= */
+function enableTilt(rootEl){
+  const max = 10; // deg
+  rootEl.addEventListener('mousemove', (e)=>{
+    const r = rootEl.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    const rx = (y - .5) * -max;
+    const ry = (x - .5) *  max;
+    rootEl.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  });
+  rootEl.addEventListener('mouseleave', ()=>{
+    rootEl.style.transform = 'perspective(900px) rotateX(0) rotateY(0)';
+  });
+}
+document.querySelectorAll('.tilt').forEach(enableTilt);
+
+/* =========================================================
+   Smooth anchor scroll with small offset
+   ========================================================= */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const id = a.getAttribute('href');
+    if(id.length>1){
+      e.preventDefault();
+      const el = document.querySelector(id);
+      if(!el) return;
+      const top = el.getBoundingClientRect().top + scrollY - 10;
+      scrollTo({ top, behavior: 'smooth' });
+    }
+  });
+});
+</script>
+</body>
+</html>
+
