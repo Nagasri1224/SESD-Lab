@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Ride | Singleton Demo</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --panel-color: #FFFFFF;
+            --primary-accent: #E0BBE4; /* Light Lavender */
+            --secondary-accent: #FAF7FD; /* Very light, almost white purple */
+            --text-color: #555; /* Dark gray for readability */
+            --highlight-color: #A064FF; /* Brighter Purple */
+            --button-color-main: #B27FFF; /* Medium Purple for primary buttons */
+            --button-color-secondary: #FF7B7B; /* Soft Red for secondary action */
+            --console-bg: #2D004C; /* Deep Purple */
+            --console-text: #FFEDCC; /* Creamy Yellow */
+            --header-font: 'Orbitron', sans-serif;
+            --body-font: 'Montserrat', sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--body-font);
+            /* Removed background color for a clean, white look */
+            background-color: #f4f4f5; 
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .app-container {
+            background: var(--panel-color);
+            width: 100%;
+            max-width: 800px; /* Wider for sidebar layout */
+            min-height: 700px;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eee;
+            animation: appLoad 0.8s ease-out forwards;
+        }
+        
+        @keyframes appLoad {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- Animated Text --- */
+        .animated-text-gradient {
+            background: linear-gradient(90deg, var(--highlight-color), #FF7B7B, #FFD600, var(--highlight-color));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShine 4s linear infinite;
+        }
+
+        @keyframes textShine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        header {
+            padding: 1rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        header h1 {
+            margin: 0;
+            font-family: var(--header-font);
+            font-weight: 700;
+            font-size: 2.2rem;
+        }
+        
+        .app-body {
+            display: flex;
+            flex: 1;
+        }
+
+        /* --- Vertical Tab Structure --- */
+        .tab-navigation {
+            display: flex;
+            flex-direction: column;
+            width: 200px;
+            background-color: var(--secondary-accent);
+            padding: 1.5rem 0.5rem;
+            border-right: 1px solid #eee;
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 1rem;
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            color: var(--text-color);
+            font-family: var(--body-font);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            background: var(--panel-color);
+            color: var(--highlight-color);
+            transform: translateX(5px);
+        }
+        
+        .tab-btn.active {
+            background: var(--panel-color);
+            color: var(--highlight-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .tab-btn.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--highlight-color);
+            border-radius: 0 4px 4px 0;
+            animation: activeBar 0.4s ease;
+        }
+        
+        @keyframes activeBar {
+            from { height: 0%; }
+            to { height: 60%; }
+        }
+        
+        .tab-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 2.5;
+        }
+
+        /* --- Main Content Area --- */
+        main {
+            flex: 1;
+            padding: 0;
+            position: relative;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2.5rem;
+            animation: contentFadeIn 0.6s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes contentFadeIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        h2 {
+            font-family: var(--header-font);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(90deg, var(--highlight-color), var(--button-color-main));
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(127, 0, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(127, 0, 255, 0.3);
+        }
+        
+        .action-button.secondary {
+             background: linear-gradient(90deg, #FF7B7B, #FF4A4A);
+             box-shadow: 0 8px 20px rgba(255, 74, 74, 0.2);
+        }
+        .action-button.secondary:hover {
+            box-shadow: 0 12px 25px rgba(255, 74, 74, 0.3);
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 0 4px rgba(160, 100, 255, 0.2);
+        }
+        
+        .status-panel, .console-panel {
+            margin-top: 1.5rem;
+            background-color: var(--console-bg);
+            color: var(--console-text);
+            padding: 1.5rem;
+            border-radius: 15px;
+            max-height: 220px;
+            overflow-y: auto;
+            border: 2px solid #444;
+        }
+        
+        .status-panel h3, .console-panel h3 {
+            font-family: var(--header-font);
+            color: #fff;
+            margin-top: 0;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #555;
+        }
+        
+        pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1 class="animated-text-gradient">Aura Ride</h1>
+        </header>
+
+        <div class="app-body">
+            <nav class="tab-navigation">
+                <button class="tab-btn active" data-tab="dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Dashboard
+                </button>
+                <button class="tab-btn" data-tab="request">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 16.5 17.5 13H22v-2h-4.5l-3.5-3.5"></path><path d="M8 18.5 4.5 15H2v-2h2.5L8 9.5"></path><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M12 8a7 7 0 1 0 0 8 7 7 0 1 0 0-8z"></path></svg>
+                    Request
+                </button>
+                <button class="tab-btn" data-tab="settings">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    Settings
+                </button>
+            </nav>
+            
+            <main>
+                <div id="dashboard" class="tab-content active">
+                    <h2 class="animated-text-gradient">System Dashboard</h2>
+                    <div class="status-panel">
+                        <h3>Live System Status</h3>
+                        <pre id="status-log">System Idle.</pre>
+                    </div>
+                    <div class="console-panel">
+                        <h3>Event Log</h3>
+                        <pre id="console-log">Logs will appear here...</pre>
+                    </div>
+                </div>
+
+                <div id="request" class="tab-content">
+                     <h2 class="animated-text-gradient">Book Your Ride</h2>
+                     <div style="margin-bottom: 1rem;">
+                         <label for="pickup">Pickup Location</label>
+                         <input type="text" id="pickup" class="input-field" value="Neo-Metropolis Central">
+                     </div>
+                     <div style="margin-bottom: 1.5rem;">
+                         <label for="destination">Destination</label>
+                         <input type="text" id="destination" class="input-field" value="Quadrant 7 Spaceport">
+                     </div>
+                     <button id="request-ride-btn" class="action-button">Request Now</button>
+                     <button id="end-ride-btn" class="action-button secondary" style="margin-top: 1rem;">End Trip</button>
+                </div>
+                
+                <div id="settings" class="tab-content">
+                    <h2 class="animated-text-gradient">Preferences</h2>
+                    <p>Adjust your ride settings and preferences.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        // --- The Singleton RideManager Class (No Changes) ---
+        class RideManager {
+            static instance = null;
+
+            constructor() {
+                this._activeTrip = null;
+                this._tripStatus = 'IDLE';
+                this._creationTime = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' });
+                console.log(`RideManager instance created at ${this._creationTime}`);
+            }
+            
+            static getInstance() {
+                if (!RideManager.instance) {
+                    RideManager.instance = new RideManager();
+                }
+                return RideManager.instance;
+            }
+
+            requestRide(pickup, destination) {
+                if (this._activeTrip) {
+                    return { success: false, message: '[ERROR] Active trip in progress.' };
+                }
+                
+                this._activeTrip = {
+                    id: 'AR-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+                    pickup,
+                    destination,
+                };
+                this._tripStatus = 'SEARCHING';
+                
+                setTimeout(() => {
+                    if (this._tripStatus === 'SEARCHING') {
+                        this._tripStatus = 'IN_PROGRESS';
+                        customLog(`[TRIP] Drone-cab located! Trip ${this._activeTrip.id} is IN_PROGRESS.`);
+                        updateStatusUI();
+                    }
+                }, 3000);
+
+                return { success: true, message: `[SYSTEM] Searching for trip: ${this._activeTrip.id}` };
+            }
+
+            endRide() {
+                if (!this._activeTrip) {
+                    return { success: false, message: '[ERROR] No active trip.' };
+                }
+                const tripId = this._activeTrip.id;
+                this._activeTrip = null;
+                this._tripStatus = 'IDLE';
+                customLog(`[TRIP] Trip ${tripId} has been TERMINATED.`);
+                return { success: true, message: `[SYSTEM] Trip ${tripId} terminated.` };
+            }
+            
+            get status() {
+                return {
+                    init_time: this._creationTime,
+                    status: this._tripStatus,
+                    ride_data: this._activeTrip,
+                };
+            }
+        }
+
+        // --- UI Logic (No Changes) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+            const requestBtn = document.getElementById('request-ride-btn');
+            const endBtn = document.getElementById('end-ride-btn');
+            const statusLog = document.getElementById('status-log');
+            const consoleLog = document.getElementById('console-log');
+            const rideManager = RideManager.getInstance();
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    contents.forEach(content => content.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+            
+            requestBtn.addEventListener('click', () => {
+                const pickup = document.getElementById('pickup').value;
+                const destination = document.getElementById('destination').value;
+                const result = rideManager.requestRide(pickup, destination);
+                customLog(result.message);
+                updateStatusUI();
+            });
+
+            endBtn.addEventListener('click', () => {
+                const result = rideManager.endRide();
+                customLog(result.message);
+                updateStatusUI();
+            });
+            
+            window.customLog = (message) => {
+                console.log(message);
+                consoleLog.textContent += `> ${message}\n`;
+                consoleLog.parentElement.scrollTop = consoleLog.parentElement.scrollHeight;
+            }
+
+            window.updateStatusUI = () => {
+                statusLog.textContent = JSON.stringify(rideManager.status, null, 2);
+            }
+            
+            updateStatusUI();
+            customLog('[SYSTEM] Aura Ride online.');
+            customLog(`[INFO] RideManager instance live since ${rideManager.status.init_time}`);
+        });
+    </script>
+</body>
+</html>
